@@ -8,7 +8,7 @@ exports.register = async (req, res) => {
     const parseReponse = userDataSchema.safeParse(req.body);
     
     if(!parseReponse.success) {
-        return res.status(411).json({
+        return res.status(400).json({
             message: "Invalid User Inputs",
             issues: parseReponse.error.issues.map((issue) => (issue.message))
         })
@@ -22,7 +22,7 @@ exports.register = async (req, res) => {
         })
 
         if(existingUser) {
-            return res.status(411).json({
+            return res.status(409).json({
                 message: "User already exists/Email already taken"
             })
         }
@@ -36,7 +36,7 @@ exports.register = async (req, res) => {
             select: { id: true, role: true }
         })
 
-        const token = jwt.sign({ id: newUser.id, role: newUser.role }, jwtSecret, { expiresIn: '1h'} );
+        const token = jwt.sign({ id: newUser.id, role: newUser.role }, jwtSecret, { expiresIn: '7d'} );
 
         return res.status(200).json({
             message: "User Registered",
@@ -55,7 +55,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     const parseResponse = partialUserDataSchema.safeParse(req.body);
     if(!parseResponse.success) {
-        return res.status(411).json({
+        return res.status(400).json({
             message: "Invalid User Input",
             issues: parseResponse.error.issues.map((issue) => (issue.message))
         })
@@ -69,21 +69,21 @@ exports.login = async (req, res) => {
         })
     
         if(!exisitngUser || !exisitngUser.email) {
-            return res.status(411).json({
+            return res.status(404).json({
                 message: "User doenst exist"
             })
         }
     
-        isPasswordMatched = await bcrypt.compare(password, exisitngUser.password);
+        const isPasswordMatched = await bcrypt.compare(password, exisitngUser.password);
     
         if(!isPasswordMatched) {
-            return res.status(411).json({
+            return res.status(401).json({
                 message: "Incorrect Password"
             })
 
         }
         
-        const token = jwt.sign({ id: exisitngUser.id, role: exisitngUser.role }, jwtSecret, { expiresIn: '1h'} );
+        const token = jwt.sign({ id: exisitngUser.id, role: exisitngUser.role }, jwtSecret, { expiresIn: '7d'} );
 
         return res.status(200).json({
             message: "Logged In Successfully!",
