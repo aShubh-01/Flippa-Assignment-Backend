@@ -1,17 +1,18 @@
-const jwt = require('jsonwebtokens');
+const jwt = require('jsonwebtoken');
 const { jwtSecret, prisma } = require('../config');
 
 exports.verifyUser = async (req, res, next) => {
-    const token = req.headers.token;
-    const decodedJWT = await jwt.verify(token, jwtSecret);
+    const token = req.headers.authorization;
 
-    if(!decodedJWT) {
-        return res.status(411).json({
+    if(!token) {
+        return res.status(401).json({
             message: "Unauthorized Request"
         })
     }
-    
+
     try {
+        const decodedJWT = await jwt.verify(token, jwtSecret);
+
         const exisitngUser = await prisma.user.findFirst({
             where: { 
                 id: decodedJWT.id,
@@ -23,6 +24,7 @@ exports.verifyUser = async (req, res, next) => {
             req.userId = exisitngUser.id;
             next();
         }
+
         return;
 
     } catch (err) {

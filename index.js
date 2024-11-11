@@ -10,8 +10,8 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.use('/user', userRouter);
-app.use('/bid', bidRouter);
-app.use('/asset', assetRouter);
+app.use('/users', userRouter);
+app.use('/bids', bidRouter);
+app.use('/assets', assetRouter);
 
 app.listen(port, () => console.log('Backend in runnin on port ' + port));
